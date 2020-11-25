@@ -46,7 +46,7 @@ export default function App() {
   };
 
   const doLogin = async (email, password) => {
-    console.log(email + '...' + password);
+    //console.log(email + '...' + password);
     setloggingIn(true);
     setError(null);
     let formData = new FormData();
@@ -59,7 +59,7 @@ export default function App() {
         body: formData,
       });
       let json = await response.json();
-      console.log(json);
+      //console.log(json);
       if (json.status != false) {
         setUserProfile(json);
         setUserToken(json.token);
@@ -89,7 +89,7 @@ export default function App() {
       }
       setloggingIn(false);
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       setError('Error connecting to server');
       setloggingIn(false);
     }
