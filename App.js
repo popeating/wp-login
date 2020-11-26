@@ -61,20 +61,21 @@ export default function App() {
       let json = await response.json();
       //console.log(json);
       if (json.status != false) {
-        setUserProfile(json);
-        setUserToken(json.token);
-        setIsLogged(true);
         setError(null);
-        await AsyncStorage.setItem(
-          'userProfile',
-          JSON.stringify({
-            isLoggedIn: json.status,
-            authToken: json.token,
-            id: json.data.id,
-            name: json.data.user_login,
-            avatar: json.avatar,
-          })
-        );
+        try {
+          await AsyncStorage.setItem(
+            'userProfile',
+            JSON.stringify({
+              isLoggedIn: json.status,
+              authToken: json.token,
+              id: json.data.id,
+              name: json.data.user_login,
+              avatar: json.avatar,
+            })
+          );
+        } catch {
+          setError('Error storing data on device');
+        }
         setUserProfile({
           isLoggedIn: json.status,
           authToken: json.token,
@@ -82,8 +83,10 @@ export default function App() {
           name: json.data.user_login,
           avatar: json.avatar,
         });
+        setIsLogged(true);
+        setUserProfile(json);
+        setUserToken(json.token);
       } else {
-        console.log('else');
         setIsLogged(false);
         setError('Login Failed');
       }
