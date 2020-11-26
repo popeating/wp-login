@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { loginUrl } from './const/const';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -124,6 +125,7 @@ export default function App() {
 
   return (
     <mainContext.Provider value={wContext}>
+      <StatusBar style="dark" />
       <NavigationContainer>
         <AppStack.Navigator initialRouteName="Login">
           {isLogged == false ? (
