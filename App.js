@@ -16,7 +16,7 @@ export default function App() {
   const [userToken, setUserToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
 
-  const [loggingIn, setloggingIn] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false); // Corrected variable name
   const [error, setError] = useState(null);
 
   const AppStack = createStackNavigator();
@@ -24,11 +24,12 @@ export default function App() {
   useEffect(() => {
     AsyncStorage.getItem('userProfile').then((value) => {
       if (value) {
-        setUserProfile(JSON.parse(value)),
-          setIsLoading(false),
-          setIsLogged(true);
+        setUserProfile(JSON.parse(value));
+        setIsLoading(false);
+        setIsLogged(true);
       } else {
-        setIsLoading(false), setIsLogged(false);
+        setIsLoading(false);
+        setIsLogged(false);
       }
     });
   }, []);
@@ -36,9 +37,9 @@ export default function App() {
   const doLogout = async () => {
     try {
       await AsyncStorage.removeItem('userProfile');
-      setloggingIn(true);
+      setLoggingIn(true);
       setUserProfile(null);
-      setloggingIn(false);
+      setLoggingIn(false);
       setIsLogged(false);
       return true;
     } catch (exception) {
@@ -47,8 +48,8 @@ export default function App() {
   };
 
   const doLogin = async (email, password) => {
-    //console.log(email + '...' + password);
-    setloggingIn(true);
+    console.log('Login initiated:', email, password);
+    setLoggingIn(true);
     setError(null);
     let formData = new FormData();
     formData.append('type', 'login');
@@ -59,57 +60,83 @@ export default function App() {
         method: 'POST',
         body: formData,
       });
-      let json = await response.json();
-      //console.log(json);
-      if (json.status != false) {
-        setError(null);
+  
+      console.log('Server Response Status:', response.status);
+      const content = await response.text();
+      console.log('Response Content:', content);
+  
+      // Check if the response contains a valid JSON string
+      const jsonStartIndex = content.indexOf('{');
+      if (jsonStartIndex !== -1) {
+        const jsonString = content.slice(jsonStartIndex);
+  
         try {
-          await AsyncStorage.setItem(
-            'userProfile',
-            JSON.stringify({
+          let json = JSON.parse(jsonString);
+          console.log('Parsed JSON:', json);
+  
+          if (json.status !== false) {
+            setError(null);
+            try {
+              await AsyncStorage.setItem(
+                'userProfile',
+                JSON.stringify({
+                  isLoggedIn: json.status,
+                  authToken: json.token,
+                  id: json.data.id,
+                  name: json.data.user_login,
+                  avatar: json.avatar,
+                })
+              );
+            } catch {
+              setError('Error storing data on device');
+            }
+            setUserProfile({
               isLoggedIn: json.status,
               authToken: json.token,
               id: json.data.id,
               name: json.data.user_login,
               avatar: json.avatar,
-            })
-          );
-        } catch {
-          setError('Error storing data on device');
+            });
+            setIsLogged(true);
+            setUserProfile(json);
+            setUserToken(json.token);
+          } else {
+            setIsLogged(false);
+            setError('Login Failed');
+          }
+        } catch (jsonError) {
+          console.error('JSON Parse Error:', jsonError);
+          setError('Invalid JSON in response');
         }
-        setUserProfile({
-          isLoggedIn: json.status,
-          authToken: json.token,
-          id: json.data.id,
-          name: json.data.user_login,
-          avatar: json.avatar,
-        });
-        setIsLogged(true);
-        setUserProfile(json);
-        setUserToken(json.token);
       } else {
-        setIsLogged(false);
-        setError('Login Failed');
+        console.error('Response does not contain valid JSON');
+        setError('Invalid response from server');
       }
-      setloggingIn(false);
+  
+      setLoggingIn(false);
     } catch (error) {
-      //console.error(error);
+      console.error('Login Error:', error);
       setError('Error connecting to server');
-      setloggingIn(false);
+      setLoggingIn(false);
     }
   };
+  
 
   const wContext = {
     userProfile: userProfile,
     loggingIn: loggingIn,
     error: error,
     doSome: () => {
+      // Assuming doSome is a placeholder function
+      console.log('doSome called'); // Debug statement
       doSome();
     },
     doLogin: (email, password) => {
+      console.log('doLogin called'); // Debug statement
       doLogin(email, password);
     },
     doLogout: () => {
+      console.log('doLogout called'); // Debug statement
       doLogout();
     },
   };
