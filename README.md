@@ -1,4 +1,7 @@
 # wp-login
+
+## ```npm i --force```
+
 wp-login is a Wordpress login interface (not using Wordpress provided API), that is written in React Native.
 It is a simple demo that can login (persistent) a user against Worpdress user database; it can be useful to make Apps that can access to protected content on a Wordpress powered website.
 For example a protected company website with a database of products (or other product details made with custom posts), a database of contents with access levels and so on.
